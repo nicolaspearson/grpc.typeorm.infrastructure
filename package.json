@@ -1,0 +1,37 @@
+{
+	"name": "grpc-typeorm-infrastructure",
+	"version": "1.0.0",
+	"description": "Simple infrastructure implementation for TypeORM using gRPC Boom.",
+	"main": "src/index.js",
+	"scripts": {
+		"build": "npm run tslint && rm -rf ./src/*.js && rm -rf ./src/**/*.js && npm run build:ts",
+		"build:ts": "tsc --rootDir ./src/",
+		"tslint": "tslint --fix -c tslint.json -p tsconfig.json",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"infrastructure",
+		"typeorm",
+		"grpc",
+		"boom",
+		"typescript"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/nicolaspearson/grpc.typeorm.infrastructure"
+	},
+	"author": "Nicolas Pearson",
+	"license": "MIT",
+	"dependencies": {
+		"class-validator": "~0.9.1",
+		"grpc-boom": "1.0.6",
+		"typeorm": "~0.2.9"
+	},
+	"devDependencies": {
+		"@types/node": "~10.12.12",
+		"ts-helpers": "~1.1.2",
+		"ts-node": "~7.0.1",
+		"tslint": "~5.11.0",
+		"typescript": "~3.2.2"
+	}
+}
