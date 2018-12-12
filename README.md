@@ -1,6 +1,6 @@
 # gRPC Typeorm Infrastructure
 
-Simple infrastructure implementation for [TypeORM](http://typeorm.io) using [gRPC Boom](https://github.com/nicolaspearson/grpc.boom) to generate gRPC status codes.
+Simple infrastructure implementation for [TypeORM](http://typeorm.io) using [gRPC Boom](https://github.com/nicolaspearson/grpc.boom) to generate gRPC-friendly error objects.
 
 ### Installation
 
