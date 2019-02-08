@@ -205,6 +205,7 @@ findOneWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T>;
 findManyWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T[]>;
 search(limit: number, searchTerms: SearchTerm[]);
 save(entity: T): Promise<T>;
+saveAll(entities: T[]): Promise<T[]>;
 update(entity: T, id: number): Promise<T>;
 getSearchFilter(
 	limit: number,

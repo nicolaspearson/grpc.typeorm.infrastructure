@@ -71,6 +71,7 @@ declare class BaseService<T> {
 	findManyWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T[]>;
 	search(limit: number, searchTerms: SearchTerm[]): Promise<T[]>;
 	save(entity: T): Promise<T>;
+	saveAll(entities: T[]): Promise<T[]>;
 	update(entity: T, id: number): Promise<T>;
 	delete(id: number): Promise<T>;
 	getSearchFilter(
