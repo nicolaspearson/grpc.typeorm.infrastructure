@@ -10,10 +10,19 @@
 
 Simple generic class implementation for [TypeORM](http://typeorm.io) utilising the repository pattern. This library uses [gRPC Boom](https://github.com/nicolaspearson/grpc.boom) to generate gRPC-friendly error objects.
 
+It is assumed that you are using the `grpc` library.
+
 ## Installation
 
 ```
 npm install grpc-typeorm-infrastructure --save
+```
+
+
+Install the `grpc` library:
+
+```
+npm install grpc --save
 ```
 
 ## Usage

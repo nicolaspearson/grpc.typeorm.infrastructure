@@ -1,6 +1,6 @@
 {
 	"name": "grpc-typeorm-infrastructure",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Simple infrastructure implementation for TypeORM using gRPC Boom.",
 	"main": "src/index.js",
 	"scripts": {
@@ -24,14 +24,16 @@
 	"license": "MIT",
 	"dependencies": {
 		"class-validator": "~0.9.1",
-		"grpc-boom": "1.0.12",
-		"typeorm": "~0.2.12"
+		"grpc-boom": "~1.0.18",
+		"typeorm": "~0.2.13"
 	},
 	"devDependencies": {
-		"@types/node": "~10.12.23",
+		"@types/node": "~10.12.24",
+		"grpc": "~1.18.0",
+		"protobufjs": "~6.8.8",
 		"ts-helpers": "~1.1.2",
 		"ts-node": "~8.0.2",
 		"tslint": "~5.12.1",
-		"typescript": "3.1.6"
+		"typescript": "3.3.3"
 	}
 }
