@@ -206,6 +206,10 @@ delete(record: T, options?: RemoveOptions);
 The base service will give you access to the following methods:
 
 ```typescript
+preSaveHook(entity: T): void;
+preUpdateHook(entity: T): void;
+validId(id: number): boolean;
+isValid(entity: T): Promise<boolean>;
 findAll(): Promise<T[]>;
 findAllByFilter(filter: FindManyOptions<T>): Promise<T[]>;
 findOneById(id: number): Promise<T>;

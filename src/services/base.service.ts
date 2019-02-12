@@ -12,6 +12,14 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 		// Empty constructor
 	}
 
+	public preSaveHook(entity: T): void {
+		// Executed before the save repository call
+	}
+
+	public preUpdateHook(entity: T): void {
+		// Executed before the update repository call
+	}
+
 	public validId(id: number): boolean {
 		return id !== undefined && id > 0;
 	}
@@ -150,6 +158,8 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 					'Incorrect / invalid parameters supplied'
 				);
 			}
+			// Execute the hook
+			this.preSaveHook(entity);
 			// Save the entity to the database
 			return await this.repository.save(entity);
 		} catch (error) {
@@ -170,6 +180,8 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 						'Incorrect / invalid parameters supplied'
 					);
 				}
+				// Execute the hook
+				this.preSaveHook(entity);
 			}
 			// Save the entity to the database
 			return await this.repository.saveAll(entities);
@@ -190,6 +202,8 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 					'Incorrect / invalid parameters supplied'
 				);
 			}
+			// Execute the hook
+			this.preUpdateHook(entity);
 			// Update the entity on the database
 			return await this.repository.updateOneById(id, entity);
 		} catch (error) {
