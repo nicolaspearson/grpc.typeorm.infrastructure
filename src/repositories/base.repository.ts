@@ -190,6 +190,33 @@ export default abstract class BaseRepository<T> {
 		return this.findOneById(id);
 	}
 
+	public async updateAll(
+		records: T[],
+		options?: SaveOptions,
+		resolveRelations?: boolean
+	): Promise<T[]> {
+		const results: any = await this.executeRepositoryFunction(
+			this.getRepository().save(records, options)
+		);
+		if (!results) {
+			throw GrpcBoom.notFound(
+				`${this.entityName}: The records were not updated`
+			);
+		}
+
+		if (resolveRelations) {
+			const eagerResults: T[] = [];
+			for (const result of results) {
+				if (result.id) {
+					// Use find to automatically resolve eager relations
+					eagerResults.push(await this.findOneById(result.id));
+				}
+			}
+			return eagerResults;
+		}
+		return results;
+	}
+
 	public async delete(record: T, options?: RemoveOptions): Promise<T> {
 		return await this.executeRepositoryFunction(
 			this.getRepository().remove(record, options)
