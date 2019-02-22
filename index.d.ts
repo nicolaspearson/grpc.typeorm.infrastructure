@@ -75,6 +75,7 @@ declare class BaseService<T> {
 	save(entity: T): Promise<T>;
 	saveAll(entities: T[]): Promise<T[]>;
 	update(entity: T, id: number): Promise<T>;
+	updateAll(entities: T[]): Promise<T[]>;
 	delete(id: number): Promise<T>;
 	getSearchFilter(
 		limit: number,
