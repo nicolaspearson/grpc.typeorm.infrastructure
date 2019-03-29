@@ -20,6 +20,14 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 		// Executed before the update repository call
 	}
 
+	public preDeleteHook(entity: T): void {
+		// Executed before the delete repository call
+	}
+
+	public preResultHook(entity: T): void {
+		// Executed before the result is returned
+	}
+
 	public validId(id: number): boolean {
 		return id !== undefined && id > 0;
 	}
@@ -54,7 +62,9 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 
 	public async findAll(): Promise<T[]> {
 		try {
-			return await this.repository.getAll();
+			const entities: T[] = await this.repository.getAll();
+			entities.map(item => this.preResultHook(item));
+			return entities;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -65,7 +75,9 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 
 	public async findAllByFilter(filter: FindManyOptions<T>): Promise<T[]> {
 		try {
-			return await this.repository.findManyByFilter(filter);
+			const entities: T[] = await this.repository.findManyByFilter(filter);
+			entities.map(item => this.preResultHook(item));
+			return entities;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -77,11 +89,11 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 	public async findOneById(id: number): Promise<T> {
 		try {
 			if (!this.validId(id) || isNaN(id)) {
-				throw GrpcBoom.invalidArgument(
-					'Incorrect / invalid parameters supplied'
-				);
+				throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
 			}
-			return await this.repository.findOneById(id);
+			const entity: T = await this.repository.findOneById(id);
+			this.preResultHook(entity);
+			return entity;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -92,7 +104,9 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 
 	public async findOneByFilter(filter: FindOneOptions<T>): Promise<T> {
 		try {
-			return await this.repository.findOneByFilter(filter);
+			const entityResult = await this.repository.findOneByFilter(filter);
+			this.preResultHook(entityResult);
+			return entityResult;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -101,14 +115,11 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 		}
 	}
 
-	public async findOneWithQueryBuilder(
-		options: ISearchQueryBuilderOptions
-	): Promise<T> {
+	public async findOneWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T> {
 		try {
-			const entityResult = await this.repository.findOneWithQueryBuilder(
-				options
-			);
+			const entityResult = await this.repository.findOneWithQueryBuilder(options);
 			if (entityResult) {
+				this.preResultHook(entityResult);
 				return entityResult;
 			} else {
 				throw GrpcBoom.notFound('The requested object could not be found');
@@ -121,11 +132,11 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 		}
 	}
 
-	public async findManyWithQueryBuilder(
-		options: ISearchQueryBuilderOptions
-	): Promise<T[]> {
+	public async findManyWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T[]> {
 		try {
-			return await this.repository.findManyWithQueryBuilder(options);
+			const entities: T[] = await this.repository.findManyWithQueryBuilder(options);
+			entities.map(item => this.preResultHook(item));
+			return entities;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -134,13 +145,12 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 		}
 	}
 
-	public async search(
-		limit: number,
-		searchTerms: SearchTerm[]
-	): Promise<T[]> {
+	public async search(limit: number, searchTerms: SearchTerm[]): Promise<T[]> {
 		try {
 			const filter = this.getSearchFilter(limit, searchTerms);
-			return await this.findManyWithQueryBuilder(filter);
+			const entities: T[] = await this.findManyWithQueryBuilder(filter);
+			entities.map(item => this.preResultHook(item));
+			return entities;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -154,14 +164,14 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 			// Check if the entity is valid
 			const entityIsValid = await this.isValid(entity);
 			if (!entityIsValid) {
-				throw GrpcBoom.invalidArgument(
-					'Incorrect / invalid parameters supplied'
-				);
+				throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
 			}
 			// Execute the hook
 			this.preSaveHook(entity);
 			// Save the entity to the database
-			return await this.repository.save(entity);
+			const savedEntity: T = await this.repository.save(entity);
+			this.preResultHook(savedEntity);
+			return savedEntity;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -176,15 +186,15 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 				// Check if the entity is valid
 				const entityIsValid = await this.isValid(entity);
 				if (!entityIsValid) {
-					throw GrpcBoom.invalidArgument(
-						'Incorrect / invalid parameters supplied'
-					);
+					throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
 				}
 				// Execute the hook
 				this.preSaveHook(entity);
 			}
 			// Save the entities to the database
-			return await this.repository.saveAll(entities);
+			const savedEntities: T[] = await this.repository.saveAll(entities);
+			savedEntities.map(item => this.preResultHook(item));
+			return savedEntities;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -198,14 +208,14 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 			// Check if the entity is valid
 			const entityIsValid = await this.isValid(entity);
 			if (!entityIsValid || !this.validId(id)) {
-				throw GrpcBoom.invalidArgument(
-					'Incorrect / invalid parameters supplied'
-				);
+				throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
 			}
 			// Execute the hook
 			this.preUpdateHook(entity);
 			// Update the entity on the database
-			return await this.repository.updateOneById(id, entity);
+			const updatedEntity: T = await this.repository.updateOneById(id, entity);
+			this.preResultHook(updatedEntity);
+			return updatedEntity;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -220,15 +230,15 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 				// Check if the entity is valid
 				const entityIsValid = await this.isValid(entity);
 				if (!entityIsValid) {
-					throw GrpcBoom.invalidArgument(
-						'Incorrect / invalid parameters supplied'
-					);
+					throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
 				}
 				// Execute the hook
 				this.preUpdateHook(entity);
 			}
-			// Save the entities to the database
-			return await this.repository.updateAll(entities);
+			// Update the entities on the database
+			const updatedEntities: T[] = await this.repository.updateAll(entities);
+			updatedEntities.map(item => this.preResultHook(item));
+			return updatedEntities;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -240,13 +250,15 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 	public async delete(id: number): Promise<T> {
 		try {
 			if (!this.validId(id)) {
-				throw GrpcBoom.invalidArgument(
-					'Incorrect / invalid parameters supplied'
-				);
+				throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
 			}
 			const entityResult: T = await this.repository.findOneById(id);
-			await this.repository.delete(entityResult);
-			return entityResult;
+			// Execute the hook
+			this.preDeleteHook(entityResult);
+			// Delete the record
+			const deletedEntity: T = await this.repository.delete(entityResult);
+			this.preResultHook(deletedEntity);
+			return deletedEntity;
 		} catch (error) {
 			if (error && error.isBoom) {
 				throw error;
@@ -255,33 +267,41 @@ export default abstract class BaseService<T extends DeepPartial<T>> {
 		}
 	}
 
-	public getSearchFilter(
-		limit: number,
-		searchTerms: SearchTerm[]
-	): ISearchQueryBuilderOptions {
+	public async softDelete(id: number): Promise<T> {
+		try {
+			if (!this.validId(id)) {
+				throw GrpcBoom.invalidArgument('Incorrect / invalid parameters supplied');
+			}
+			const entityResult: T = await this.repository.findOneById(id);
+			// Execute the hook - In this scenario your hook should set the deleted_at field
+			this.preDeleteHook(entityResult);
+			// Save the record to apply the soft delete
+			const deletedEntity: T = await this.repository.save(entityResult);
+			this.preResultHook(deletedEntity);
+			return deletedEntity;
+		} catch (error) {
+			if (error && error.isBoom) {
+				throw error;
+			}
+			throw GrpcBoom.internal(error);
+		}
+	}
+
+	public getSearchFilter(limit: number, searchTerms: SearchTerm[]): ISearchQueryBuilderOptions {
 		if (limit >= 0 && searchTerms && searchTerms.length > 0) {
 			let whereClause = '';
 			const andWhereClause: string[] = [];
 			for (const searchTerm of searchTerms) {
 				const term = SearchTerm.newSearchTerm(searchTerm);
 				let quoteValue = true;
-				if (
-					searchTerm.value.startsWith('(') &&
-					searchTerm.value.endsWith(')')
-				) {
+				if (searchTerm.value.startsWith('(') && searchTerm.value.endsWith(')')) {
 					quoteValue = false;
 				}
 				const value = quoteValue ? `'${term.value}'` : `${term.value}`;
 				if (!whereClause || whereClause === '') {
-					whereClause = `${term.field} ${
-						term.operator ? term.operator : ' = '
-					} ${value}`;
+					whereClause = `${term.field} ${term.operator ? term.operator : ' = '} ${value}`;
 				} else {
-					andWhereClause.push(
-						`${term.field} ${
-							term.operator ? term.operator : ' = '
-						} ${value}`
-					);
+					andWhereClause.push(`${term.field} ${term.operator ? term.operator : ' = '} ${value}`);
 				}
 			}
 			return {

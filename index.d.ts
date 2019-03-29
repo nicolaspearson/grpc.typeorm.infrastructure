@@ -13,11 +13,7 @@ declare class SearchTerm {
 	field: string;
 	value: string;
 	operator: string;
-	static newSearchTerm(obj: {
-		field?: string;
-		value?: string;
-		operator?: string;
-	}): SearchTerm;
+	static newSearchTerm(obj: { field?: string; value?: string; operator?: string }): SearchTerm;
 }
 
 declare interface ISearchQueryBuilderOptions {
@@ -30,7 +26,6 @@ declare interface ISearchQueryBuilderOptions {
 declare class BaseRepository<T> {
 	private entityName: string;
 	constructor(entityName: string);
-	protected getRepository(): Repository<T>;
 	protected getQueryBuilder(): SelectQueryBuilder<T>;
 	executeRepositoryFunction(repositoryFunction: Promise<any>): Promise<any>;
 	getAll(options?: FindManyOptions<T>): Promise<T[]>;
@@ -40,11 +35,7 @@ declare class BaseRepository<T> {
 	findManyById(idList: number[], options?: FindOneOptions<T>): Promise<T[]>;
 	findOneByFilter(options: FindOneOptions<T>): Promise<T>;
 	save(record: T, options?: SaveOptions): Promise<T>;
-	saveAll(
-		records: T[],
-		options?: SaveOptions,
-		resolveRelations?: boolean
-	): Promise<T[]>;
+	saveAll(records: T[], options?: SaveOptions, resolveRelations?: boolean): Promise<T[]>;
 	updateOneById(id: number, record: T, options?: SaveOptions): Promise<T>;
 	delete(record: T, options?: RemoveOptions): Promise<T>;
 	deleteOneById(
@@ -53,9 +44,7 @@ declare class BaseRepository<T> {
 		deleteOptions?: RemoveOptions
 	): Promise<T>;
 	deleteManyById(idList: number[], deleteOptions?: RemoveOptions): Promise<T>;
-	findOneWithQueryBuilder(
-		options: ISearchQueryBuilderOptions
-	): Promise<T | undefined>;
+	findOneWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T | undefined>;
 	findManyWithQueryBuilder(options: ISearchQueryBuilderOptions): Promise<T[]>;
 }
 
@@ -63,6 +52,8 @@ declare class BaseService<T> {
 	constructor(repository: BaseRepository<T>);
 	preSaveHook(entity: T): void;
 	preUpdateHook(entity: T): void;
+	preDeleteHook(entity: T): void;
+	preResultHook(entity: T): void;
 	validId(id: number): boolean;
 	isValid(entity: T): Promise<boolean>;
 	findAll(): Promise<T[]>;
@@ -77,10 +68,8 @@ declare class BaseService<T> {
 	update(entity: T, id: number): Promise<T>;
 	updateAll(entities: T[]): Promise<T[]>;
 	delete(id: number): Promise<T>;
-	getSearchFilter(
-		limit: number,
-		searchTerms: SearchTerm[]
-	): ISearchQueryBuilderOptions;
+	softDelete(id: number): Promise<T>;
+	getSearchFilter(limit: number, searchTerms: SearchTerm[]): ISearchQueryBuilderOptions;
 }
 
 export { BaseRepository, BaseService, ISearchQueryBuilderOptions, SearchTerm };

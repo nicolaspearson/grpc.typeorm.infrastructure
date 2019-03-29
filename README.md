@@ -8,7 +8,7 @@
 [license-url]: https://opensource.org/licenses/MIT
 [license-image]: https://img.shields.io/npm/l/make-coverage-badge.svg
 
-Simple generic class implementation for [TypeORM](http://typeorm.io) utilising the repository pattern. This library uses [gRPC Boom](https://github.com/nicolaspearson/grpc.boom) to generate gRPC-friendly error objects.
+This library provides a simple wrapper around [TypeORM](http://typeorm.io) functions in order to provide consistent and predictable error messages, it uses [gRPC Boom](https://github.com/nicolaspearson/grpc.boom) to generate the gRPC-friendly error objects.
 
 It is assumed that you are using the `grpc` library.
 
@@ -17,7 +17,6 @@ It is assumed that you are using the `grpc` library.
 ```
 npm install grpc-typeorm-infrastructure --save
 ```
-
 
 Install the `grpc` library:
 
@@ -32,15 +31,6 @@ npm install grpc --save
 Create a TypeORM entity:
 
 ```typescript
-import GrpcBoom from 'grpc-typeorm-infrastructure';
-import {
-	IsEmail,
-	IsOptional,
-	Length,
-	validate,
-	ValidationArguments,
-	ValidationError
-} from 'class-validator';
 import {
 	Column,
 	CreateDateColumn,
@@ -49,96 +39,31 @@ import {
 	UpdateDateColumn
 } from 'typeorm';
 
-@Entity({ name: 'user' })
-export class User {
+@Entity({ name: 'hero' })
+export default class Hero {
 	@PrimaryGeneratedColumn()
-	public id: number;
+	public id?: number;
 
-	@Column({ name: 'username', length: 255 })
-	@Length(3, 255, {
-		message: (args: ValidationArguments) => {
-			return User.getGenericValidationLengthMessage(args);
-		}
-	})
-	public username: string;
+	@Column({ name: 'name', length: 500 })
+	public name: string;
 
-	@Column({ name: 'password', length: 255 })
-	@Length(4, 255, {
-		message: (args: ValidationArguments) => {
-			return User.getGenericValidationLengthMessage(args);
-		}
-	})
-	@IsOptional()
-	public password: string;
+	@Column({ name: 'identity', length: 500 })
+	public identity: string;
 
-	@Column({ name: 'email_address', length: 255 })
-	@IsEmail(
-		{},
-		{
-			message: 'Must be a valid email address'
-		}
-	)
-	public emailAddress: string;
+	@Column({ name: 'hometown', length: 500 })
+	public hometown: string;
 
-	@CreateDateColumn({ name: 'created_at' })
-	public createdAt: Date;
+	@Column({ name: 'age' })
+	public age: number;
 
-	@UpdateDateColumn({ name: 'updated_at' })
-	public updatedAt: Date;
+	@CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
+	public createdAt?: Date;
 
-	public static newUser(obj: {
-		id?: number;
-		username?: string;
-		emailAddress?: string;
-		password?: string;
-	}) {
-		const newUser = new User();
-		if (obj.id) {
-			newUser.id = obj.id;
-		}
-		if (obj.username) {
-			newUser.username = obj.username;
-		}
-		if (obj.emailAddress) {
-			newUser.emailAddress = obj.emailAddress;
-		}
-		if (obj.password) {
-			newUser.password = obj.password;
-		}
-		return newUser;
-	}
+	@UpdateDateColumn({ name: 'updated_at', type: 'timestamp with time zone' })
+	public updatedAt?: Date;
 
-	public static getGenericValidationLengthMessage(args: ValidationArguments) {
-		return 'Incorrect length: Found ' + args.constraints[0] + ' characters';
-	}
-
-	public async isValid(): Promise<boolean> {
-		try {
-			const errors: ValidationError[] = await validate(this, {
-				validationError: { target: true, value: true }
-			});
-			if (errors.length > 0) {
-				const metadata = new Metadata();
-				for (const item of errors) {
-					if (item.property && item.constraints) {
-						let value: string = 'Unknown error';
-						for (const val of Object.values(item.constraints)) {
-							value = val;
-							break;
-						}
-						metadata.add(item.property, value);
-					}
-				}
-				throw GrpcBoom.invalidArgument('Validation failed on the provided request', metadata);
-			}
-			return true;
-		} catch (error) {
-			if (error && error.isBoom) {
-				throw error;
-			}
-			throw GrpcBoom.invalidArgument('Unable to validate request: ' + error);
-		}
-	}
+	@Column({ name: 'deleted_at', nullable: true, type: 'timestamp with time zone' })
+	public deletedAt?: Date;
 }
 ```
 
@@ -147,11 +72,13 @@ export class User {
 Create a repository for the entity above:
 
 ```typescript
-import { BaseRepository } from 'grpc-typeorm-infrastructure';
+import BaseRepository from 'grpc-typeorm-infrastructure';
 
-export default class UserRepository extends BaseRepository<User> {
+import Hero from '@entities/hero.entity';
+
+export default class HeroRepository extends BaseRepository<Hero> {
 	constructor() {
-		super(User.name);
+		super(Hero.name);
 	}
 }
 ```
@@ -163,9 +90,31 @@ Create a service for the entity above:
 ```typescript
 import { BaseService } from 'grpc-typeorm-infrastructure';
 
-export default class UserService extends BaseService<User> {
-	constructor(private repository: UserRepository) {
-		super(repository);
+import Hero from '@entities/hero.entity';
+
+export default class HeroService extends BaseService<Hero> {
+	constructor(heroRepository: HeroRepository) {
+		super(heroRepository);
+	}
+
+	public preSaveHook(hero: Hero): void {
+		// Executed before the save repository call
+		delete hero.id;
+	}
+
+	public preUpdateHook(hero: Hero) {
+		// Executed before the update repository call
+		delete hero.updatedAt;
+	}
+
+	public preDeleteHook(hero: Hero) {
+		// Executed before the delete repository call
+		hero.deletedAt = new Date();
+	}
+
+	public preResultHook(hero: Hero) {
+		// Executed before the result is returned
+		delete hero.deletedAt;
 	}
 }
 ```
@@ -208,6 +157,8 @@ The base service will give you access to the following methods:
 ```typescript
 preSaveHook(entity: T): void;
 preUpdateHook(entity: T): void;
+preDeleteHook(entity: T): void;
+preResultHook(entity: T): void;
 validId(id: number): boolean;
 isValid(entity: T): Promise<boolean>;
 findAll(): Promise<T[]>;
@@ -226,4 +177,5 @@ getSearchFilter(
 	searchTerms: SearchTerm[]
 ): ISearchQueryBuilderOptions;
 delete(id: number): Promise<T>;
+softDelete(id: number): Promise<T>;
 ```
