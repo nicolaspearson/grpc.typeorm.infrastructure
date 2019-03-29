@@ -136,7 +136,7 @@ saveAll(
 	options?: SaveOptions,
 	resolveRelations?: boolean
 ): Promise<T[]>;
-updateOneById(id: number, record: T, options?: SaveOptions): Promise<T>;
+updateOneById(id: number, record: T): Promise<T>;
 deleteOneById(
 	id: number,
 	findOptions?: FindOneOptions<T>,

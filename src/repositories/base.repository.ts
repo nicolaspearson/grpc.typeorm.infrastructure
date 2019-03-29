@@ -134,12 +134,12 @@ export default abstract class BaseRepository<T> {
 		return results;
 	}
 
-	public async updateOneById(id: number, record: T, options?: SaveOptions): Promise<T> {
+	public async updateOneById(id: number, record: T): Promise<T> {
 		const foundRecord = await this.findOneById(id);
 		if (!foundRecord) {
 			throw GrpcBoom.notFound(`${this.entityName}: The requested record was not found: ${id}`);
 		}
-		await this.executeRepositoryFunction(this.repository.update(id, record, options));
+		await this.executeRepositoryFunction(this.repository.update(id, record));
 		// Use find to automatically resolve eager relations
 		return this.findOneById(id);
 	}

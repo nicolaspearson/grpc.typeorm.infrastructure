@@ -36,7 +36,7 @@ declare class BaseRepository<T> {
 	findOneByFilter(options: FindOneOptions<T>): Promise<T>;
 	save(record: T, options?: SaveOptions): Promise<T>;
 	saveAll(records: T[], options?: SaveOptions, resolveRelations?: boolean): Promise<T[]>;
-	updateOneById(id: number, record: T, options?: SaveOptions): Promise<T>;
+	updateOneById(id: number, record: T): Promise<T>;
 	delete(record: T, options?: RemoveOptions): Promise<T>;
 	deleteOneById(
 		id: number,
