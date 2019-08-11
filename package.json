@@ -1,13 +1,15 @@
 {
 	"name": "grpc-typeorm-infrastructure",
-	"version": "1.0.12",
+	"version": "1.0.13",
 	"description": "Simple infrastructure implementation for TypeORM using gRPC Boom.",
 	"main": "src/index.js",
 	"scripts": {
 		"build": "npm run tslint && rm -rf ./src/*.js && rm -rf ./src/**/*.js && npm run build:ts",
 		"build:ts": "tsc --rootDir ./src/",
 		"tslint": "tslint --fix -c tslint.json -p tsconfig.json",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"ncu": "ncu",
+		"ncu:u": "ncu -u"
 	},
 	"keywords": [
 		"infrastructure",
@@ -23,17 +25,18 @@
 	"author": "Nicolas Pearson",
 	"license": "MIT",
 	"dependencies": {
-		"class-validator": "~0.9.1",
-		"grpc-boom": "~1.0.22",
-		"typeorm": "~0.2.17"
+		"class-validator": "~0.10.0",
+		"grpc-boom": "~1.0.23",
+		"typeorm": "~0.2.18"
 	},
 	"devDependencies": {
-		"@types/node": "~12.0.2",
-		"grpc": "~1.20.3",
+		"@types/node": "~12.7.1",
+		"grpc": "~1.22.2",
+		"npm-check-updates": "~3.1.21",
 		"protobufjs": "~6.8.8",
 		"ts-helpers": "~1.1.2",
-		"ts-node": "~8.1.0",
-		"tslint": "~5.16.0",
-		"typescript": "3.4.5"
+		"ts-node": "~8.3.0",
+		"tslint": "~5.18.0",
+		"typescript": "3.5.3"
 	}
 }

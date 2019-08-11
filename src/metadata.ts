@@ -47,6 +47,27 @@ export interface IMetadata {
 	 * @return The newly cloned object.
 	 */
 	clone(): IMetadata;
+
+	/**
+	 * Set options on the metadata object
+	 * @param options Boolean options for the beginning of the call.
+	 *   These options only have any effect when passed at the beginning of
+	 *   a client request.
+	 */
+	setOptions(options: IMetadataOptions): void;
+}
+
+export interface IMetadataOptions {
+	/* Signal that the request is idempotent. Defaults to false */
+	idempotentRequest?: boolean;
+	/* Signal that the call should not return UNAVAILABLE before it has
+	 * started. Defaults to true. */
+	waitForReady?: boolean;
+	/* Signal that the call is cacheable. GRPC is free to use GET verb.
+	 * Defaults to false */
+	cacheableRequest?: boolean;
+	/* Signal that the initial metadata should be corked. Defaults to false. */
+	corked?: boolean;
 }
 
 /**
@@ -57,7 +78,7 @@ export default class Metadata implements IMetadata {
 	// tslint:disable variable-name
 	private _internal_repr: any = {};
 
-	constructor() {
+	constructor(options?: IMetadataOptions) {
 		this._internal_repr = {};
 	}
 
@@ -88,7 +109,7 @@ export default class Metadata implements IMetadata {
 
 	public getMap = (): { [key: string]: MetadataValue } => {
 		const result: any = {};
-		Object.keys(this._internal_repr).forEach((key) => {
+		Object.keys(this._internal_repr).forEach(key => {
 			const values = this._internal_repr[key];
 			if (values.length > 0) {
 				result[key] = values[0];
@@ -101,4 +122,22 @@ export default class Metadata implements IMetadata {
 		// Not implemented
 		return this;
 	};
+
+	/**
+	 * Set options on the metadata object
+	 * @param {Object} options Boolean options for the beginning of the call.
+	 *     These options only have any effect when passed at the beginning of
+	 *     a client request.
+	 * @param {boolean=} [options.idempotentRequest=false] Signal that the request
+	 *     is idempotent
+	 * @param {boolean=} [options.waitForReady=true] Signal that the call should
+	 *     not return UNAVAILABLE before it has started.
+	 * @param {boolean=} [options.cacheableRequest=false] Signal that the call is
+	 *     cacheable. GRPC is free to use GET verb.
+	 * @param {boolean=} [options.corked=false] Signal that the initial metadata
+	 *     should be corked.
+	 */
+	public setOptions(options: IMetadataOptions) {
+		// Not implemented locally
+	}
 }
