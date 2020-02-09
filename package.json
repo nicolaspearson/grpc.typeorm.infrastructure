@@ -26,7 +26,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"class-validator": "~0.11.0",
-		"grpc-boom": "~1.0.26",
+		"grpc-boom": "~1.0.27",
 		"typeorm": "~0.2.20"
 	},
 	"devDependencies": {
