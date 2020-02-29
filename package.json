@@ -27,7 +27,7 @@
 	"dependencies": {
 		"class-validator": "~0.11.0",
 		"grpc-boom": "~1.0.27",
-		"typeorm": "~0.2.22"
+		"typeorm": "~0.2.24"
 	},
 	"devDependencies": {
 		"@types/node": "~13.7.7",
