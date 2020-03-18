@@ -25,7 +25,7 @@
 	"author": "Nicolas Pearson",
 	"license": "MIT",
 	"dependencies": {
-		"class-validator": "~0.11.0",
+		"class-validator": "~0.11.1",
 		"grpc-boom": "~1.0.27",
 		"typeorm": "~0.2.24"
 	},
